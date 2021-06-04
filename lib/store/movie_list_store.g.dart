@@ -49,11 +49,13 @@ mixin _$MovieListStore on _MovieListStore, Store {
     });
   }
 
-  final _$fetchMoviesAsyncAction = AsyncAction('_MovieListStore.fetchMovies');
+  final _$fetchMovieListAsyncAction =
+      AsyncAction('_MovieListStore.fetchMovieList');
 
   @override
-  Future<dynamic> fetchMovies() {
-    return _$fetchMoviesAsyncAction.run(() => super.fetchMovies());
+  Future<dynamic> fetchMovieList(String query, String page) {
+    return _$fetchMovieListAsyncAction
+        .run(() => super.fetchMovieList(query, page));
   }
 
   @override

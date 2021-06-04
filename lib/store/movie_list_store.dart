@@ -28,9 +28,9 @@ abstract class _MovieListStore with Store {
   }
 
   @action
-  Future fetchMovies() async {
+  Future fetchMovieList(String query, String page) async {
     try {
-      final movieResponse = await _moviesRepository.fetchMovies();
+      final movieResponse = await _moviesRepository.fetchMovies(query, page);
       if ((movieResponse.results?.length ?? 0) > 0) {
         _movieListResponseFuture =
             ObservableFuture(Future.value(movieResponse));

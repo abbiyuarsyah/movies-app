@@ -14,7 +14,7 @@ class _MovieListPageState extends State<MovieListPage> {
   @override
   void initState() {
     _movieListStore ??= MovieListStore();
-    _movieListStore?.fetchMovies();
+    _movieListStore?.fetchMovieList("superman", "1");
     super.initState();
   }
 
