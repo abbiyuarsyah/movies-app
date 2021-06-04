@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_db_app/store/movie_list_store.dart';
 
 class MovieListPage extends StatefulWidget {
   const MovieListPage({Key? key}) : super(key: key);
@@ -8,6 +9,15 @@ class MovieListPage extends StatefulWidget {
 }
 
 class _MovieListPageState extends State<MovieListPage> {
+  MovieListStore? _movieListStore;
+
+  @override
+  void initState() {
+    _movieListStore ??= MovieListStore();
+    _movieListStore?.fetchMovies();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -11,7 +11,6 @@ class BaseApi {
       connectTimeout: 120000,
       receiveTimeout: 120000,
       headers: ApiConfig.header,
-      contentType: ContentType.json.toString(),
       responseType: ResponseType.plain,
     ));
 
@@ -47,6 +46,11 @@ class BaseApi {
       errorDescription = "Unexpected error occured";
     }
     return errorDescription;
+  }
+
+  String catchErrorNetwork(DioError error) {
+    String message = baseApi.handleError(error);
+    return message;
   }
 }
 
