@@ -16,6 +16,9 @@ abstract class _MovieListStore with Store {
   @observable
   String? errorMessage;
 
+  @observable
+  MovieListResponse? movieListResponse;
+
   @computed
   StoreState get updateState {
     if (_movieListResponseFuture == null &&
@@ -30,13 +33,9 @@ abstract class _MovieListStore with Store {
   @action
   Future fetchMovieList(String query, String page) async {
     try {
-      final movieResponse = await _moviesRepository.fetchMovies(query, page);
-      if ((movieResponse.results?.length ?? 0) > 0) {
-        _movieListResponseFuture =
-            ObservableFuture(Future.value(movieResponse));
-      } else {
-        errorMessage = movieResponse.statusMesage ?? "Something is wrong";
-      }
+      _movieListResponseFuture =
+          ObservableFuture(_moviesRepository.fetchMovies(query, page));
+      movieListResponse = await _movieListResponseFuture;
     } on Exception catch (error) {
       errorMessage = error.toString();
     }

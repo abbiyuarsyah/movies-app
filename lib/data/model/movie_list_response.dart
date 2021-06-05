@@ -24,6 +24,8 @@ class Result {
   String? overview;
   @JsonKey(name: "release_date")
   String? releaseDate;
+  @JsonKey(name: "poster_path")
+  String? posterPath;
 
   Result();
 

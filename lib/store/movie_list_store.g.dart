@@ -49,6 +49,22 @@ mixin _$MovieListStore on _MovieListStore, Store {
     });
   }
 
+  final _$movieListResponseAtom =
+      Atom(name: '_MovieListStore.movieListResponse');
+
+  @override
+  MovieListResponse? get movieListResponse {
+    _$movieListResponseAtom.reportRead();
+    return super.movieListResponse;
+  }
+
+  @override
+  set movieListResponse(MovieListResponse? value) {
+    _$movieListResponseAtom.reportWrite(value, super.movieListResponse, () {
+      super.movieListResponse = value;
+    });
+  }
+
   final _$fetchMovieListAsyncAction =
       AsyncAction('_MovieListStore.fetchMovieList');
 
@@ -62,6 +78,7 @@ mixin _$MovieListStore on _MovieListStore, Store {
   String toString() {
     return '''
 errorMessage: ${errorMessage},
+movieListResponse: ${movieListResponse},
 updateState: ${updateState}
     ''';
   }
