@@ -1,16 +1,14 @@
-# movie_db_app
+# Movie App 
 
-A new Flutter project.
+# Installing
+```
+1. git clone
+2. flutter get packages
+```
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Description
+```
+1. I use a State Management called MobX, the reason I use MobX because in my opinion, MobX is lighter than BLoC.
+The documentation here (https://mobx.netlify.app/). 
+2. If there's something wrong when it runs, please let me know via email abbiyuarsyah@gmail.com
+```
