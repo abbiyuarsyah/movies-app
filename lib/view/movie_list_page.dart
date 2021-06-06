@@ -347,6 +347,7 @@ class _MovieListPageState extends State<MovieListPage> {
           hintText: "Search your movie",
           suffixIcon: IconButton(
             onPressed: () {
+              _offset = 0;
               _pageIndex = 1;
               _movieListStore?.reset();
               _query = _textSearchController.text;
