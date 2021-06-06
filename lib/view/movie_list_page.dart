@@ -4,6 +4,7 @@ import 'package:mobx/mobx.dart';
 import 'package:movie_db_app/data/constant/store_state.dart';
 import 'package:movie_db_app/data/model/movie_list_response.dart';
 import 'package:movie_db_app/store/movie_list_store.dart';
+import 'package:movie_db_app/view/movie_detail_page.dart';
 
 class MovieListPage extends StatefulWidget {
   const MovieListPage({Key? key}) : super(key: key);
@@ -53,6 +54,7 @@ class _MovieListPageState extends State<MovieListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.green,
         title: Text("Movies"),
         actions: <Widget>[
           GestureDetector(
@@ -141,7 +143,14 @@ class _MovieListPageState extends State<MovieListPage> {
           itemCount: results.length,
           itemBuilder: (context, i) {
             return GestureDetector(
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieDetailPage(
+                    result: results[i],
+                  ),
+                ),
+              ),
               child: Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
@@ -250,86 +259,97 @@ class _MovieListPageState extends State<MovieListPage> {
             crossAxisCount: 2, childAspectRatio: itemWidth / itemHeight),
         shrinkWrap: true,
         controller: controller,
-        itemBuilder: (_, index) => Container(
-          margin: EdgeInsets.only(top: 8, bottom: 16, left: 8, right: 8),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 4,
-                  offset: Offset(0, 3),
-                ),
-              ]),
-          child: Column(
-            children: [
-              Container(
-                child: (results[index].posterPath != null)
-                    ? Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 250,
-                        margin: EdgeInsets.only(bottom: 16),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8),
+        itemBuilder: (_, index) => GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MovieDetailPage(
+                result: results[index],
+              ),
+            ),
+          ),
+          child: Container(
+            margin: EdgeInsets.only(top: 8, bottom: 16, left: 8, right: 8),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 3),
+                  ),
+                ]),
+            child: Column(
+              children: [
+                Container(
+                  child: (results[index].posterPath != null)
+                      ? Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 250,
+                          margin: EdgeInsets.only(bottom: 16),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              topRight: Radius.circular(8),
+                            ),
+                            child: Image.network(
+                              "http://image.tmdb.org/t/p/w185/${results[index].posterPath}",
+                            ),
                           ),
-                          child: Image.network(
-                            "http://image.tmdb.org/t/p/w185/${results[index].posterPath}",
+                        )
+                      : Container(
+                          margin: EdgeInsets.only(bottom: 16),
+                          width: 185,
+                          height: 250,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withAlpha(50),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              topRight: Radius.circular(8),
+                            ),
                           ),
                         ),
-                      )
-                    : Container(
-                        margin: EdgeInsets.only(bottom: 16),
-                        width: 185,
-                        height: 250,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withAlpha(50),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8),
-                          ),
-                        ),
-                      ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 8, right: 8, top: 8),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  results[index].title ?? "-",
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 8, right: 8, top: 8),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  results[index].releaseDate ?? "-",
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black.withAlpha(150),
+                Container(
+                  margin: EdgeInsets.only(left: 8, right: 8, top: 8),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    results[index].title ?? "-",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ),
-              Container(
-                alignment: Alignment.centerLeft,
-                margin: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 16),
-                child: Text(
-                  "${results[index].overview ?? "-"}",
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black.withAlpha(150),
+                Container(
+                  margin: EdgeInsets.only(left: 8, right: 8, top: 8),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    results[index].releaseDate ?? "-",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black.withAlpha(150),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Container(
+                  alignment: Alignment.centerLeft,
+                  margin:
+                      EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 16),
+                  child: Text(
+                    "${results[index].overview ?? "-"}",
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black.withAlpha(150),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         itemCount: results.length,
@@ -344,6 +364,7 @@ class _MovieListPageState extends State<MovieListPage> {
         controller: _textSearchController,
         style: TextStyle(),
         decoration: InputDecoration(
+          focusColor: Colors.green,
           hintText: "Search your movie",
           suffixIcon: IconButton(
             onPressed: () {
@@ -353,7 +374,13 @@ class _MovieListPageState extends State<MovieListPage> {
               _query = _textSearchController.text;
               _movieListStore?.fetchMovieList(_query, "1");
             },
-            icon: Icon(Icons.search),
+            icon: Icon(
+              Icons.search,
+              color: Colors.green,
+            ),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.green),
           ),
         ),
       ),
