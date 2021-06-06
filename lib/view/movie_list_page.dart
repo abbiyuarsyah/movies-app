@@ -22,7 +22,6 @@ class _MovieListPageState extends State<MovieListPage> {
   ScrollController _scrollController = ScrollController();
   List<ReactionDisposer>? _disposers;
   double _offset = 0;
-  List<Result> _results = [];
 
   @override
   void initState() {
@@ -87,8 +86,13 @@ class _MovieListPageState extends State<MovieListPage> {
                           ? Center(child: CircularProgressIndicator())
                           : Stack(
                               children: [
-                                _moviesView(_movieListStore?.lisResult ?? [],
-                                    _scrollController),
+                                (_isGridView)
+                                    ? _gridView(
+                                        _movieListStore?.lisResult ?? [],
+                                        _scrollController)
+                                    : _moviesView(
+                                        _movieListStore?.lisResult ?? [],
+                                        _scrollController),
                                 (_isLoading)
                                     ? Positioned(
                                         bottom: 0,
@@ -110,7 +114,8 @@ class _MovieListPageState extends State<MovieListPage> {
                           ScrollController(initialScrollOffset: _offset);
                       _isLoading = false;
                       return (_isGridView)
-                          ? _gridView(_movieListStore?.lisResult ?? [])
+                          ? _gridView(_movieListStore?.lisResult ?? [],
+                              _scrollController)
                           : _moviesView(_movieListStore?.lisResult ?? [],
                               _scrollController);
                   }
@@ -124,17 +129,7 @@ class _MovieListPageState extends State<MovieListPage> {
   }
 
   Widget _moviesView(List<Result> results, ScrollController controller) {
-    _scrollController.addListener(() {
-      if (_scrollController.position.maxScrollExtent ==
-          _scrollController.position.pixels) {
-        if (!_isLoading) {
-          _offset = _scrollController.offset;
-          _isLoading = true;
-          _pageIndex = _pageIndex + 1;
-          _movieListStore?.fetchMovieList(_query, _pageIndex.toString(), true);
-        }
-      }
-    });
+    _scrollListener();
 
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -238,7 +233,9 @@ class _MovieListPageState extends State<MovieListPage> {
     );
   }
 
-  Widget _gridView(List<Result> results) {
+  Widget _gridView(List<Result> results, ScrollController controller) {
+    _scrollListener();
+
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height) / 1.4 + 16;
     final double itemWidth = size.width / 2;
@@ -249,7 +246,7 @@ class _MovieListPageState extends State<MovieListPage> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, childAspectRatio: itemWidth / itemHeight),
         shrinkWrap: true,
-        controller: _scrollController,
+        controller: controller,
         itemBuilder: (_, index) => Container(
           margin: EdgeInsets.only(top: 8, bottom: 16, left: 8, right: 8),
           decoration: BoxDecoration(
@@ -269,7 +266,7 @@ class _MovieListPageState extends State<MovieListPage> {
                 child: (results[index].posterPath != null)
                     ? Container(
                         width: 185,
-                        margin: EdgeInsets.only(top: 16, bottom: 16),
+                        margin: EdgeInsets.only(bottom: 16),
                         child: ClipRRect(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8),
@@ -281,11 +278,15 @@ class _MovieListPageState extends State<MovieListPage> {
                         ),
                       )
                     : Container(
-                        margin: EdgeInsets.only(top: 16, left: 16, bottom: 16),
+                        margin: EdgeInsets.only(bottom: 16),
                         width: 185,
+                        height: 250,
                         decoration: BoxDecoration(
                           color: Colors.grey.withAlpha(50),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8),
+                          ),
                         ),
                       ),
               ),
@@ -350,5 +351,19 @@ class _MovieListPageState extends State<MovieListPage> {
         ),
       ),
     );
+  }
+
+  _scrollListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.position.pixels) {
+        if (!_isLoading) {
+          _offset = _scrollController.offset;
+          _isLoading = true;
+          _pageIndex = _pageIndex + 1;
+          _movieListStore?.fetchMovieList(_query, _pageIndex.toString(), true);
+        }
+      }
+    });
   }
 }
