@@ -22,11 +22,12 @@ class _MovieListPageState extends State<MovieListPage> {
   ScrollController _scrollController = ScrollController();
   List<ReactionDisposer>? _disposers;
   double _offset = 0;
+  int _currentPage = 0;
 
   @override
   void initState() {
     _movieListStore ??= MovieListStore();
-    _movieListStore?.fetchMovieList(_query, "1", false);
+    _movieListStore?.fetchMovieList(_query, "1");
     super.initState();
   }
 
@@ -112,6 +113,8 @@ class _MovieListPageState extends State<MovieListPage> {
                     case StoreState.loaded:
                       _scrollController =
                           ScrollController(initialScrollOffset: _offset);
+                      _currentPage =
+                          _movieListStore?.movieListResponse?.totalPages ?? 0;
                       _isLoading = false;
                       return (_isGridView)
                           ? _gridView(_movieListStore?.lisResult ?? [],
@@ -265,7 +268,8 @@ class _MovieListPageState extends State<MovieListPage> {
               Container(
                 child: (results[index].posterPath != null)
                     ? Container(
-                        width: 185,
+                        width: MediaQuery.of(context).size.width,
+                        height: 250,
                         margin: EdgeInsets.only(bottom: 16),
                         child: ClipRRect(
                           borderRadius: BorderRadius.only(
@@ -343,8 +347,10 @@ class _MovieListPageState extends State<MovieListPage> {
           hintText: "Search your movie",
           suffixIcon: IconButton(
             onPressed: () {
+              _pageIndex = 1;
+              _movieListStore?.reset();
               _query = _textSearchController.text;
-              _movieListStore?.fetchMovieList(_query, "1", false);
+              _movieListStore?.fetchMovieList(_query, "1");
             },
             icon: Icon(Icons.search),
           ),
@@ -357,11 +363,11 @@ class _MovieListPageState extends State<MovieListPage> {
     _scrollController.addListener(() {
       if (_scrollController.position.maxScrollExtent ==
           _scrollController.position.pixels) {
-        if (!_isLoading) {
+        if (!_isLoading && _currentPage != _pageIndex) {
           _offset = _scrollController.offset;
           _isLoading = true;
           _pageIndex = _pageIndex + 1;
-          _movieListStore?.fetchMovieList(_query, _pageIndex.toString(), true);
+          _movieListStore?.fetchMovieList(_query, _pageIndex.toString());
         }
       }
     });

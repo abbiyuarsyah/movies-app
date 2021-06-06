@@ -84,9 +84,23 @@ mixin _$MovieListStore on _MovieListStore, Store {
       AsyncAction('_MovieListStore.fetchMovieList');
 
   @override
-  Future<dynamic> fetchMovieList(String query, String page, bool isPagination) {
+  Future<dynamic> fetchMovieList(String query, String page) {
     return _$fetchMovieListAsyncAction
-        .run(() => super.fetchMovieList(query, page, isPagination));
+        .run(() => super.fetchMovieList(query, page));
+  }
+
+  final _$_MovieListStoreActionController =
+      ActionController(name: '_MovieListStore');
+
+  @override
+  dynamic reset() {
+    final _$actionInfo = _$_MovieListStoreActionController.startAction(
+        name: '_MovieListStore.reset');
+    try {
+      return super.reset();
+    } finally {
+      _$_MovieListStoreActionController.endAction(_$actionInfo);
+    }
   }
 
   @override

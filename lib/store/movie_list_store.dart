@@ -34,21 +34,19 @@ abstract class _MovieListStore with Store {
   }
 
   @action
-  Future fetchMovieList(String query, String page, bool isPagination) async {
+  Future fetchMovieList(String query, String page) async {
     try {
-      if (!isPagination) {
-        _movieListResponseFuture =
-            ObservableFuture(_moviesRepository.fetchMovies(query, page));
-        movieListResponse = await _movieListResponseFuture;
-      } else {
-        _movieListResponseFuture =
-            ObservableFuture(_moviesRepository.fetchMovies(query, page));
-        movieListResponse = await _movieListResponseFuture;
-      }
-
+      _movieListResponseFuture =
+          ObservableFuture(_moviesRepository.fetchMovies(query, page));
+      movieListResponse = await _movieListResponseFuture;
       lisResult.addAll(movieListResponse!.results!);
     } on Exception catch (error) {
       errorMessage = error.toString();
     }
+  }
+
+  @action
+  reset() {
+    lisResult.clear();
   }
 }
