@@ -39,8 +39,12 @@ abstract class _MovieListStore with Store {
       _movieListResponseFuture =
           ObservableFuture(_moviesRepository.fetchMovies(query, page));
       movieListResponse = await _movieListResponseFuture;
-      lisResult.addAll(movieListResponse!.results!);
-    } on Exception catch (error) {
+      lisResult.addAll(movieListResponse?.results ?? []);
+
+      if (movieListResponse?.results == null) {
+        errorMessage = movieListResponse?.statusMesage ?? "Something is wrong";
+      }
+    } catch (error) {
       errorMessage = error.toString();
     }
   }

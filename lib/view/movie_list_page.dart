@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:movie_db_app/data/constant/store_state.dart';
+import 'package:movie_db_app/data/material/bottom_sheet.dart';
 import 'package:movie_db_app/data/model/movie_list_response.dart';
 import 'package:movie_db_app/store/movie_list_store.dart';
 import 'package:movie_db_app/view/movie_detail_page.dart';
@@ -39,6 +40,22 @@ class _MovieListPageState extends State<MovieListPage> {
         _isLoading = false;
         setState(() {});
       }),
+      autorun((_) => {
+            if (_movieListStore?.errorMessage != null)
+              {
+                showModalBottomSheet(
+                  enableDrag: false,
+                  isDismissible: false,
+                  backgroundColor: Colors.transparent,
+                  context: context,
+                  builder: (context) => BottomSheetMaterial().bottomSheetDialog(
+                      _movieListStore?.errorMessage?.toString() ?? "", context,
+                      () {
+                    Navigator.pop(context);
+                  }),
+                )
+              }
+          }),
     ];
 
     super.didChangeDependencies();
