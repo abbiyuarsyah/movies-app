@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:movie_db_app/data/constant/store_state.dart';
 import 'package:movie_db_app/data/model/movie_list_response.dart';
 import 'package:movie_db_app/store/movie_list_store.dart';
@@ -16,12 +17,36 @@ class _MovieListPageState extends State<MovieListPage> {
   TextEditingController _textSearchController = TextEditingController();
   String _query = "Superman";
   bool _isGridView = false;
+  bool _isLoading = false;
+  int _pageIndex = 1;
+  ScrollController _scrollController = ScrollController();
+  List<ReactionDisposer>? _disposers;
+  double _offset = 0;
+  List<Result> _results = [];
 
   @override
   void initState() {
     _movieListStore ??= MovieListStore();
-    _movieListStore?.fetchMovieList(_query, "1");
+    _movieListStore?.fetchMovieList(_query, "1", false);
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _disposers ??= [
+      reaction((_) => _movieListStore?.lisResult, (results) {
+        _isLoading = false;
+        setState(() {});
+      }),
+    ];
+
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _disposers?.forEach((d) => d());
+    super.dispose();
   }
 
   @override
@@ -56,14 +81,38 @@ class _MovieListPageState extends State<MovieListPage> {
                     case StoreState.initial:
                       return Container();
                     case StoreState.loading:
-                      return Center(child: CircularProgressIndicator());
+                      _scrollController =
+                          ScrollController(initialScrollOffset: _offset);
+                      return (_movieListStore?.lisResult.length == 0)
+                          ? Center(child: CircularProgressIndicator())
+                          : Stack(
+                              children: [
+                                _moviesView(_movieListStore?.lisResult ?? [],
+                                    _scrollController),
+                                (_isLoading)
+                                    ? Positioned(
+                                        bottom: 0,
+                                        child: Container(
+                                          margin: EdgeInsets.only(bottom: 16),
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: Center(
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        ),
+                                      )
+                                    : Container()
+                              ],
+                            );
+
                     case StoreState.loaded:
+                      _scrollController =
+                          ScrollController(initialScrollOffset: _offset);
+                      _isLoading = false;
                       return (_isGridView)
-                          ? _gridView(
-                              _movieListStore?.movieListResponse?.results ?? [])
-                          : _moviesView(
-                              _movieListStore?.movieListResponse?.results ??
-                                  []);
+                          ? _gridView(_movieListStore?.lisResult ?? [])
+                          : _moviesView(_movieListStore?.lisResult ?? [],
+                              _scrollController);
                   }
                 }),
               ),
@@ -74,10 +123,23 @@ class _MovieListPageState extends State<MovieListPage> {
     );
   }
 
-  Widget _moviesView(List<Result> results) {
+  Widget _moviesView(List<Result> results, ScrollController controller) {
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.position.pixels) {
+        if (!_isLoading) {
+          _offset = _scrollController.offset;
+          _isLoading = true;
+          _pageIndex = _pageIndex + 1;
+          _movieListStore?.fetchMovieList(_query, _pageIndex.toString(), true);
+        }
+      }
+    });
+
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       child: ListView.builder(
+          controller: controller,
           itemCount: results.length,
           itemBuilder: (context, i) {
             return GestureDetector(
@@ -187,6 +249,7 @@ class _MovieListPageState extends State<MovieListPage> {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2, childAspectRatio: itemWidth / itemHeight),
         shrinkWrap: true,
+        controller: _scrollController,
         itemBuilder: (_, index) => Container(
           margin: EdgeInsets.only(top: 8, bottom: 16, left: 8, right: 8),
           decoration: BoxDecoration(
@@ -280,7 +343,7 @@ class _MovieListPageState extends State<MovieListPage> {
           suffixIcon: IconButton(
             onPressed: () {
               _query = _textSearchController.text;
-              _movieListStore?.fetchMovieList(_query, "1");
+              _movieListStore?.fetchMovieList(_query, "1", false);
             },
             icon: Icon(Icons.search),
           ),

@@ -34,6 +34,21 @@ mixin _$MovieListStore on _MovieListStore, Store {
     });
   }
 
+  final _$lisResultAtom = Atom(name: '_MovieListStore.lisResult');
+
+  @override
+  List<Result> get lisResult {
+    _$lisResultAtom.reportRead();
+    return super.lisResult;
+  }
+
+  @override
+  set lisResult(List<Result> value) {
+    _$lisResultAtom.reportWrite(value, super.lisResult, () {
+      super.lisResult = value;
+    });
+  }
+
   final _$errorMessageAtom = Atom(name: '_MovieListStore.errorMessage');
 
   @override
@@ -69,14 +84,15 @@ mixin _$MovieListStore on _MovieListStore, Store {
       AsyncAction('_MovieListStore.fetchMovieList');
 
   @override
-  Future<dynamic> fetchMovieList(String query, String page) {
+  Future<dynamic> fetchMovieList(String query, String page, bool isPagination) {
     return _$fetchMovieListAsyncAction
-        .run(() => super.fetchMovieList(query, page));
+        .run(() => super.fetchMovieList(query, page, isPagination));
   }
 
   @override
   String toString() {
     return '''
+lisResult: ${lisResult},
 errorMessage: ${errorMessage},
 movieListResponse: ${movieListResponse},
 updateState: ${updateState}

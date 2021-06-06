@@ -14,6 +14,9 @@ abstract class _MovieListStore with Store {
   ObservableFuture<MovieListResponse>? _movieListResponseFuture;
 
   @observable
+  List<Result> lisResult = [];
+
+  @observable
   String? errorMessage;
 
   @observable
@@ -31,11 +34,19 @@ abstract class _MovieListStore with Store {
   }
 
   @action
-  Future fetchMovieList(String query, String page) async {
+  Future fetchMovieList(String query, String page, bool isPagination) async {
     try {
-      _movieListResponseFuture =
-          ObservableFuture(_moviesRepository.fetchMovies(query, page));
-      movieListResponse = await _movieListResponseFuture;
+      if (!isPagination) {
+        _movieListResponseFuture =
+            ObservableFuture(_moviesRepository.fetchMovies(query, page));
+        movieListResponse = await _movieListResponseFuture;
+      } else {
+        _movieListResponseFuture =
+            ObservableFuture(_moviesRepository.fetchMovies(query, page));
+        movieListResponse = await _movieListResponseFuture;
+      }
+
+      lisResult.addAll(movieListResponse!.results!);
     } on Exception catch (error) {
       errorMessage = error.toString();
     }
