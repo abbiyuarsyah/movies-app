@@ -13,11 +13,13 @@ class MovieListPage extends StatefulWidget {
 
 class _MovieListPageState extends State<MovieListPage> {
   MovieListStore? _movieListStore;
+  TextEditingController _textSearchController = TextEditingController();
+  String _query = "Superman";
 
   @override
   void initState() {
     _movieListStore ??= MovieListStore();
-    _movieListStore?.fetchMovieList("superman", "1");
+    _movieListStore?.fetchMovieList(_query, "1");
     super.initState();
   }
 
@@ -31,6 +33,7 @@ class _MovieListPageState extends State<MovieListPage> {
         color: Colors.white,
         child: Column(
           children: [
+            _searchField(),
             Flexible(
               child: Container(
                 width: MediaQuery.of(context).size.width,
@@ -46,7 +49,7 @@ class _MovieListPageState extends State<MovieListPage> {
                   }
                 }),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -73,35 +76,102 @@ class _MovieListPageState extends State<MovieListPage> {
                       ),
                     ]),
                 margin: EdgeInsets.only(top: 24, left: 24, right: 24),
-                child: Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 16, left: 16, bottom: 16),
-                        child: Image.network(
-                          "http://image.tmdb.org/t/p/w92/${results[i].posterPath}",
-                        ),
-                      ),
-                      Flexible(
-                        child: Container(
-                          margin: EdgeInsets.all(16),
-                          child: Flexible(
-                            child: Text(
-                              results[i].title ?? "-",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    (results[i].posterPath != null)
+                        ? Container(
+                            width: 92,
+                            margin:
+                                EdgeInsets.only(top: 16, left: 16, bottom: 16),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.network(
+                                "http://image.tmdb.org/t/p/w92/${results[i].posterPath}",
+                              ),
+                            ),
+                          )
+                        : Container(
+                            margin:
+                                EdgeInsets.only(top: 16, left: 16, bottom: 16),
+                            width: 92,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withAlpha(50),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
+                    Flexible(
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                results[i].title ?? "-",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontSize: 22, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              margin: EdgeInsets.only(top: 8),
+                              child: Text(
+                                "Release date - ${results[i].releaseDate ?? "-"}",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black.withAlpha(150),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              margin: EdgeInsets.only(top: 8),
+                              child: Text(
+                                "${results[i].overview ?? "-"}",
+                                maxLines: 4,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black.withAlpha(150),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    ],
-                  ),
+                      ),
+                    )
+                  ],
                 ),
               ),
             );
           }),
+    );
+  }
+
+  Widget _searchField() {
+    return Container(
+      margin: EdgeInsets.all(24),
+      child: TextField(
+        controller: _textSearchController,
+        style: TextStyle(),
+        decoration: InputDecoration(
+          hintText: "Search your movie",
+          suffixIcon: IconButton(
+              onPressed: () {
+                _query = _textSearchController.text;
+                _movieListStore?.fetchMovieList(_query, "1");
+              },
+              icon: Icon(Icons.search)),
+        ),
+      ),
     );
   }
 }
