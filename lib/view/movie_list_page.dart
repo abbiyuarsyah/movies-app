@@ -15,6 +15,7 @@ class _MovieListPageState extends State<MovieListPage> {
   MovieListStore? _movieListStore;
   TextEditingController _textSearchController = TextEditingController();
   String _query = "Superman";
+  bool _isGridView = false;
 
   @override
   void initState() {
@@ -28,6 +29,19 @@ class _MovieListPageState extends State<MovieListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Movies"),
+        actions: <Widget>[
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isGridView = !_isGridView;
+              });
+            },
+            child: Container(
+              margin: EdgeInsets.only(right: 16),
+              child: (!_isGridView) ? Icon(Icons.grid_view) : Icon(Icons.list),
+            ),
+          )
+        ],
       ),
       body: Container(
         color: Colors.white,
@@ -44,8 +58,12 @@ class _MovieListPageState extends State<MovieListPage> {
                     case StoreState.loading:
                       return Center(child: CircularProgressIndicator());
                     case StoreState.loaded:
-                      return _moviesView(
-                          _movieListStore?.movieListResponse?.results ?? []);
+                      return (_isGridView)
+                          ? _gridView(
+                              _movieListStore?.movieListResponse?.results ?? [])
+                          : _moviesView(
+                              _movieListStore?.movieListResponse?.results ??
+                                  []);
                   }
                 }),
               ),
@@ -58,6 +76,7 @@ class _MovieListPageState extends State<MovieListPage> {
 
   Widget _moviesView(List<Result> results) {
     return Container(
+      margin: EdgeInsets.only(bottom: 16),
       child: ListView.builder(
           itemCount: results.length,
           itemBuilder: (context, i) {
@@ -75,7 +94,8 @@ class _MovieListPageState extends State<MovieListPage> {
                         offset: Offset(0, 3),
                       ),
                     ]),
-                margin: EdgeInsets.only(top: 24, left: 24, right: 24),
+                margin:
+                    EdgeInsets.only(top: 12, left: 24, right: 24, bottom: 12),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -156,6 +176,99 @@ class _MovieListPageState extends State<MovieListPage> {
     );
   }
 
+  Widget _gridView(List<Result> results) {
+    var size = MediaQuery.of(context).size;
+    final double itemHeight = (size.height) / 1.4 + 16;
+    final double itemWidth = size.width / 2;
+
+    return Container(
+      margin: EdgeInsets.only(left: 24, right: 24),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, childAspectRatio: itemWidth / itemHeight),
+        shrinkWrap: true,
+        itemBuilder: (_, index) => Container(
+          margin: EdgeInsets.only(top: 8, bottom: 16, left: 8, right: 8),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: Offset(0, 3),
+                ),
+              ]),
+          child: Column(
+            children: [
+              Container(
+                child: (results[index].posterPath != null)
+                    ? Container(
+                        width: 185,
+                        margin: EdgeInsets.only(top: 16, bottom: 16),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8),
+                          ),
+                          child: Image.network(
+                            "http://image.tmdb.org/t/p/w185/${results[index].posterPath}",
+                          ),
+                        ),
+                      )
+                    : Container(
+                        margin: EdgeInsets.only(top: 16, left: 16, bottom: 16),
+                        width: 185,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withAlpha(50),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 8, right: 8, top: 8),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  results[index].title ?? "-",
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 8, right: 8, top: 8),
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  results[index].releaseDate ?? "-",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black.withAlpha(150),
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 16),
+                child: Text(
+                  "${results[index].overview ?? "-"}",
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black.withAlpha(150),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        itemCount: results.length,
+      ),
+    );
+  }
+
   Widget _searchField() {
     return Container(
       margin: EdgeInsets.all(24),
@@ -165,11 +278,12 @@ class _MovieListPageState extends State<MovieListPage> {
         decoration: InputDecoration(
           hintText: "Search your movie",
           suffixIcon: IconButton(
-              onPressed: () {
-                _query = _textSearchController.text;
-                _movieListStore?.fetchMovieList(_query, "1");
-              },
-              icon: Icon(Icons.search)),
+            onPressed: () {
+              _query = _textSearchController.text;
+              _movieListStore?.fetchMovieList(_query, "1");
+            },
+            icon: Icon(Icons.search),
+          ),
         ),
       ),
     );
