@@ -12,4 +12,6 @@
 The documentation here (https://mobx.netlify.app/). 
 
 2. If there's something wrong when it runs, please let me know via email abbiyuarsyah@gmail.com
+
+3. Requires Flutter 2.2.0 or higher
 ```
